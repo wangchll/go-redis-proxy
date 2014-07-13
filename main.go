@@ -3,7 +3,7 @@ package main
 import (
 	//"fmt"
 	"strings"
-	goredis "github.com/hoisie/redis"
+	goredis "github.com/wangchll/redis"
 	redis "github.com/dotcloud/go-redis-server"
 )
 
