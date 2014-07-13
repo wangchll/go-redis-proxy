@@ -49,7 +49,7 @@ func MGet(key string, keys ...string) ([][]byte, error) {
 	chs := make([]chan string, len(keys))
 	var ret [][]byte
 	for i, key := range keys {
-		chs[i] = make(chan string)
+		chs[i] = make(chan string, 1024)
 		//@todo 暂时写死host
 		go getJsonPlus(key, chs[i])
 	}
@@ -88,6 +88,7 @@ func getJson(addr string, key string, ch chan string) {
 }
 
 func getJsonPlus(addrkey string, ch chan string) {
+	defer close(ch)
 	rs := strings.Split(addrkey, "@")
 	var addr, key string
 	if len(rs) > 2 {
@@ -106,10 +107,10 @@ func getJsonPlus(addrkey string, ch chan string) {
 		//client.Set(key, []byte("world"))
 		val, err := client.Get(k)
 		if err != nil {
-            ch <- string("")
-        } else {
-        	ch <- string(val)
-        }
+			ch <- string("")
+		} else {
+			ch <- string(val)
+		}
 	}
 	
 }
