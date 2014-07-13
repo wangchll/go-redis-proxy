@@ -7,6 +7,10 @@ import (
 	redis "github.com/dotcloud/go-redis-server"
 )
 
+var defaultAddr = "127.0.0.1:6379"
+
+var defaultSplit = "@"
+
 type MyHandler struct {
 	redis.DefaultHandler
 }
@@ -20,7 +24,7 @@ func (h *MyHandler) Get(combine string) ([]byte, error) {
 	for i, key := range keys {
 		chs[i] = make(chan string)
 		//@todo 暂时写死host
-		go getJson("127.0.0.1:6379", key, chs[i])
+		go getJson(defaultAddr, key, chs[i])
 	}
 	//字符串数组
 	res := make([]string,len(keys))
@@ -35,7 +39,7 @@ func (h *MyHandler) Get(combine string) ([]byte, error) {
 // This function needs to be registered.
 func Test2(key string) ([]byte, error) {
 	var client goredis.Client
-	client.Addr = "127.0.0.1:6379"
+	client.Addr = defaultAddr
 	var k = key
 	val, _ := client.Get(k)
 	return val, nil
@@ -67,7 +71,7 @@ func CombineGet(combine string) ([]byte, error) {
 	for i, key := range keys {
 		chs[i] = make(chan string)
 		//@todo 暂时写死host
-		go getJson("127.0.0.1:6379", key, chs[i])
+		go getJson(defaultAddr, key, chs[i])
 	}
 	//字符串数组
 	res := make([]string,len(keys))
@@ -89,7 +93,7 @@ func getJson(addr string, key string, ch chan string) {
 
 func getJsonPlus(addrkey string, ch chan string) {
 	defer close(ch)
-	rs := strings.Split(addrkey, "@")
+	rs := strings.Split(addrkey, defaultSplit)
 	var addr, key string
 	if len(rs) > 2 {
 		ch <- string("")
@@ -98,7 +102,7 @@ func getJsonPlus(addrkey string, ch chan string) {
 			addr = rs[0]
 			key = rs[1]
 		} else {
-			addr = "127.0.0.1:6379"
+			addr = defaultAddr
 			key = addrkey
 		}
 		var client goredis.Client
