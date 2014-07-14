@@ -2,14 +2,17 @@ package main
 
 import (
 	//"fmt"
-	"strings"
-	goredis "github.com/wangchll/redis"
 	redis "github.com/dotcloud/go-redis-server"
+	goredis "github.com/wangchll/redis"
+	"strings"
+	//"time"
 )
 
 var defaultAddr = "127.0.0.1:6379"
 
 var defaultSplit = "@"
+
+var defaultBuffer = 8
 
 type MyHandler struct {
 	redis.DefaultHandler
@@ -27,7 +30,7 @@ func (h *MyHandler) Get(combine string) ([]byte, error) {
 		go getJson(defaultAddr, key, chs[i])
 	}
 	//字符串数组
-	res := make([]string,len(keys))
+	res := make([]string, len(keys))
 	for k, ch := range chs {
 		res[k] = <-ch
 		//println(<-ch)
@@ -53,7 +56,7 @@ func MGet(key string, keys ...string) ([][]byte, error) {
 	chs := make([]chan string, len(keys))
 	var ret [][]byte
 	for i, key := range keys {
-		chs[i] = make(chan string, 1024)
+		chs[i] = make(chan string, defaultBuffer)
 		//@todo 暂时写死host
 		go getJsonPlus(key, chs[i])
 	}
@@ -74,7 +77,7 @@ func CombineGet(combine string) ([]byte, error) {
 		go getJson(defaultAddr, key, chs[i])
 	}
 	//字符串数组
-	res := make([]string,len(keys))
+	res := make([]string, len(keys))
 	for k, ch := range chs {
 		res[k] = <-ch
 		//println(<-ch)
@@ -116,7 +119,7 @@ func getJsonPlus(addrkey string, ch chan string) {
 			ch <- string(val)
 		}
 	}
-	
+
 }
 
 func main() {
